@@ -1,0 +1,55 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# VS Code
+.vscode/
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Spring Boot
+spring.log
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# Node (if frontend is separate)
+node_modules/
+dist/
+build/
+
+# Lombok config (behåll om ni använder Lombok)
+.lombok/
+
+# Environment / secrets
+*.env
+.env.local
+application-local.properties
+application-secret.properties
+
+# own rules
+HELP.md
