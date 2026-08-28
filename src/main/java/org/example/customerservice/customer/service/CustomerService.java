@@ -19,9 +19,7 @@ public class CustomerService {
     private final PasswordService passwordService;
     private final RestTemplate template = new RestTemplate();
 
-    public CustomerService(CustomerRepository customerRepository,
-                           PasswordService passwordService
-    ) {
+    public CustomerService(CustomerRepository customerRepository, PasswordService passwordService) {
         this.customerRepository = customerRepository;
         this.passwordService = passwordService;
     }
@@ -38,23 +36,13 @@ public class CustomerService {
             throw new AlreadyExistException("Phone number already exist");
         }
 
-        Customer customer = new Customer(
-                request.firstname(),
-                request.lastname(),
-                request.identificationNumber(),
-                request.email(),
-                passwordService.hash(request.password()),
-                request.phoneNumber()
-        );
+        Customer customer = new Customer(request.firstname(), request.lastname(), request.identificationNumber(), request.email(), passwordService.hash(request.password()), request.phoneNumber());
 
         return customerRepository.save(customer);
     }
 
     public Customer loginCustomer(String email, String password) {
-        Customer customer = customerRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new WrongEmailOrPasswordException("Wrong email or password")
-                );
+        Customer customer = customerRepository.findByEmail(email).orElseThrow(() -> new WrongEmailOrPasswordException("Wrong email or password"));
 
         if (!passwordService.matches(password, customer.getPassword())) {
             throw new WrongEmailOrPasswordException("Wrong email or password");
@@ -65,22 +53,14 @@ public class CustomerService {
 
     @Transactional
     public void updateCustomerInfo(Long id, CustomerUpdateRequest request) {
-        Customer customer = customerRepository
-                .findById(id)
-                .orElseThrow(
-                        () -> new RuntimeException("Customer not found")
-                );
+        Customer customer = customerRepository.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
 
         if (request.firstname() != null && !request.firstname().isBlank()) {
-            customer.setFirstname(
-                    request.firstname()
-            );
+            customer.setFirstname(request.firstname());
         }
 
         if (request.lastname() != null && !request.lastname().isBlank()) {
-            customer.setLastname(
-                    request.lastname()
-            );
+            customer.setLastname(request.lastname());
         }
 
         if (request.email() != null && !request.email().isBlank()) {
@@ -100,55 +80,38 @@ public class CustomerService {
         }
 
         if (request.password() != null && !request.password().isBlank()) {
-            customer.setPassword(
-                    passwordService.hash(
-                            request.password()
-                    )
-            );
+            customer.setPassword(passwordService.hash(request.password()));
         }
 
         customerRepository.save(customer);
     }
 
     public void deleteCustomer(Long id) {
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(
-                        () -> new NotFoundException("id not found")
-                );
+        Customer customer = customerRepository.findById(id).orElseThrow(() -> new NotFoundException("id not found"));
 
         ReservationStatusRequest status = null;
         try {
-            status = template.getForObject(
-                    "http://localhost:8080/customer/" + id + "/active",
-                    ReservationStatusRequest.class
-            );
+            status = template.getForObject("http://localhost:8080/customer/" + id + "/active", ReservationStatusRequest.class);
         } catch (RestClientException e) {
             System.out.println("RestClientException");
-            throw new BadRequestException(
-                    "Could not connect to Reservation service"
-            );
+            throw new BadRequestException("Could not connect to Reservation service");
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
         if (status == null) {
-            throw new BadRequestException(
-                    "Could not get status from reservation service"
-            );
+            throw new BadRequestException("Could not get status from reservation service");
         }
 
         if (status.hasActiveReservations()) {
-            throw new HaveReservationException(
-                    "You can't delete your account while having active bookings"
-            );
+            throw new HaveReservationException("You can't delete your account while having active bookings");
         }
 
         customerRepository.delete(customer);
     }
 
     public Long getId(HttpSession session) {
-        Long id = (Long) session.getAttribute(
-                "customerId");
+        Long id = (Long) session.getAttribute("customerId");
         if (id == null) {
             throw new IllegalStateException("Customer id not found in session");
         }
