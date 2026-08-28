@@ -7,7 +7,6 @@ import org.example.customerservice.customer.model.Customer;
 import org.example.customerservice.customer.model.dto.CreateCustomerRequest;
 import org.example.customerservice.customer.model.dto.CustomerLoginRequest;
 import org.example.customerservice.customer.model.dto.CustomerUpdateRequest;
-import org.example.customerservice.customer.model.dto.ReservationStatusRequest;
 import org.example.customerservice.customer.service.CustomerService;
 
 import org.example.customerservice.exceptionhandler.customexeptions.AlreadyExistException;
@@ -18,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
