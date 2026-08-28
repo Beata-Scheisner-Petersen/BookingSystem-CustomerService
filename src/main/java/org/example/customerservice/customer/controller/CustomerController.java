@@ -168,31 +168,32 @@ public class CustomerController {
         try {
             customerService.deleteCustomer(id);
 
-            return (ResponseEntity
-                    .ok()
-                    .body(
-                            Map.of(
-                                    "message",
-                                    "account deleted"
-                            )
-                    )
-            );
+            return (ResponseEntity.ok().body(Map.of("message", "account deleted")));
 
         } catch (HaveReservationException e) {
-            return (ResponseEntity
+            return (ResponseEntity.status(409).body(Map.of("error", e.getMessage())));
+        } catch (IllegalArgumentException e) {
+            return (ResponseEntity.status(500).body(Map.of("error", e.getMessage())));
+        }
+    }
+
+    @PostMapping("/getId")
+    public ResponseEntity<?> getId(HttpSession session) {
+        try {
+            Long id = customerService.getId(session);
+            return ResponseEntity
                     .status(
-                            409
+                            200
                     ).body(
                             Map.of(
-                                    "error",
-                                    e.getMessage()
+                                    "success",
+                                    id
                             )
-                    )
-            );
-        } catch (IllegalArgumentException e) {
+                    );
+        } catch (IllegalStateException e) {
             return (ResponseEntity
                     .status(
-                            500
+                            401
                     ).body(
                             Map.of(
                                     "error",
@@ -201,6 +202,5 @@ public class CustomerController {
                     )
             );
         }
-
     }
 }
