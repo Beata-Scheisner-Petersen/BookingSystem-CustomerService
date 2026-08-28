@@ -7,6 +7,7 @@ import org.example.customerservice.customer.model.Customer;
 import org.example.customerservice.customer.model.dto.CreateCustomerRequest;
 import org.example.customerservice.customer.model.dto.CustomerLoginRequest;
 import org.example.customerservice.customer.model.dto.CustomerUpdateRequest;
+import org.example.customerservice.customer.model.dto.ReservationStatusRequest;
 import org.example.customerservice.customer.service.CustomerService;
 
 import org.example.customerservice.exceptionhandler.customexeptions.AlreadyExistException;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -168,31 +170,32 @@ public class CustomerController {
         try {
             customerService.deleteCustomer(id);
 
-            return (ResponseEntity
-                    .ok()
-                    .body(
-                            Map.of(
-                                    "message",
-                                    "account deleted"
-                            )
-                    )
-            );
+            return (ResponseEntity.ok().body(Map.of("message", "account deleted")));
 
         } catch (HaveReservationException e) {
-            return (ResponseEntity
+            return (ResponseEntity.status(409).body(Map.of("error", e.getMessage())));
+        } catch (IllegalArgumentException e) {
+            return (ResponseEntity.status(500).body(Map.of("error", e.getMessage())));
+        }
+    }
+
+    @PostMapping("/getId")
+    public ResponseEntity<?> getId(HttpSession session) {
+        try {
+            Long id = customerService.getId(session);
+            return ResponseEntity
                     .status(
-                            409
+                            200
                     ).body(
                             Map.of(
-                                    "error",
-                                    e.getMessage()
+                                    "success",
+                                    id
                             )
-                    )
-            );
-        } catch (IllegalArgumentException e) {
+                    );
+        } catch (IllegalStateException e) {
             return (ResponseEntity
                     .status(
-                            500
+                            401
                     ).body(
                             Map.of(
                                     "error",
@@ -201,6 +204,5 @@ public class CustomerController {
                     )
             );
         }
-
     }
 }
