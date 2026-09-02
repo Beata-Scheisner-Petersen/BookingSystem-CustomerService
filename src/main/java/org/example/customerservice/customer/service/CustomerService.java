@@ -41,15 +41,15 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
-    public Customer loginCustomer(String email, String password) {
-        Customer customer = customerRepository.findByEmail(email).orElseThrow(() -> new WrongEmailOrPasswordException("Wrong email or password"));
-
-        if (!passwordService.matches(password, customer.getPassword())) {
-            throw new WrongEmailOrPasswordException("Wrong email or password");
-        }
-
-        return customer;
-    }
+//    public Customer loginCustomer(String email, String password) {
+//        Customer customer = customerRepository.findByEmail(email).orElseThrow(() -> new WrongEmailOrPasswordException("Wrong email or password"));
+//
+//        if (!passwordService.matches(password, customer.getPassword())) {
+//            throw new WrongEmailOrPasswordException("Wrong email or password");
+//        }
+//
+//        return customer;
+//    }
 
     @Transactional
     public void updateCustomerInfo(Long id, CustomerUpdateRequest request) {
@@ -116,5 +116,9 @@ public class CustomerService {
             throw new IllegalStateException("Customer id not found in session");
         }
         return id;
+    }
+
+    public Customer getCustomerInformation(String email) {
+        return customerRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("Customer not found"));
     }
 }
