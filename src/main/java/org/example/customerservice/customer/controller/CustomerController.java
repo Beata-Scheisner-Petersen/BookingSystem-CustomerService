@@ -30,6 +30,11 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
+    @GetMapping("/test")
+    public String test() {
+        return "test";
+    }
+
     @PostMapping
     public ResponseEntity<?> createCustomer(
             @Valid @RequestBody CreateCustomerRequest customer,
@@ -61,59 +66,59 @@ public class CustomerController {
         );
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(
-            @Valid @RequestBody CustomerLoginRequest request,
-            BindingResult result,
-            HttpSession session
-    ) {
-        if (result.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-
-            result.getFieldErrors()
-                    .forEach(
-                            error -> errors.put(
-                                    error.getField(),
-                                    error.getDefaultMessage()
-                            )
-                    )
-            ;
-
-            return (ResponseEntity
-                    .badRequest()
-                    .body(errors)
-            );
-        }
-
-        try {
-            Customer customer = customerService.loginCustomer(
-                    request.email(),
-                    request.password()
-            );
-
-            session.setAttribute(
-                    "customerId",
-                    customer.getId()
-            );
-
-            return (ResponseEntity.ok()
-                    .body(
-                            Map.of(
-                                    "message",
-                                    "login successful"
-                            )
-                    )
-            );
-
-        } catch (WrongEmailOrPasswordException e) {
-            return (ResponseEntity
-                    .status(409)
-                    .body(
-                            e.getMessage()
-                    )
-            );
-        }
-    }
+//    @PostMapping("/login")
+//    public ResponseEntity<?> login(
+//            @Valid @RequestBody CustomerLoginRequest request,
+//            BindingResult result,
+//            HttpSession session
+//    ) {
+//        if (result.hasErrors()) {
+//            Map<String, String> errors = new HashMap<>();
+//
+//            result.getFieldErrors()
+//                    .forEach(
+//                            error -> errors.put(
+//                                    error.getField(),
+//                                    error.getDefaultMessage()
+//                            )
+//                    )
+//            ;
+//
+//            return (ResponseEntity
+//                    .badRequest()
+//                    .body(errors)
+//            );
+//        }
+//
+//        try {
+//            Customer customer = customerService.loginCustomer(
+//                    request.email(),
+//                    request.password()
+//            );
+//
+//            session.setAttribute(
+//                    "customerId",
+//                    customer.getId()
+//            );
+//
+//            return (ResponseEntity.ok()
+//                    .body(
+//                            Map.of(
+//                                    "message",
+//                                    "login successful"
+//                            )
+//                    )
+//            );
+//
+//        } catch (WrongEmailOrPasswordException e) {
+//            return (ResponseEntity
+//                    .status(409)
+//                    .body(
+//                            e.getMessage()
+//                    )
+//            );
+//        }
+//    }
 
     @PostMapping("/update")
     public ResponseEntity<?> updateCustomer(
