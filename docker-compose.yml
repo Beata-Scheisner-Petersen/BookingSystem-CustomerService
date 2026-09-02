@@ -1,28 +1,30 @@
 services:
-  customerdb:
+  customer-db:
     image: mysql:8
-    container_name: customerdb
+    container_name: customer-db
     env_file: .env
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  customerservice:
+  customer-service:
     build: .
-    container_name: customerservice
+    container_name: customer-service
     ports:
       - "8080:8080"
     depends_on:
-      customerdb:
+      customer-db:
         condition: service_healthy
     env_file: .env
     environment:
-      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
-      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
-      - SPRING_DATASOURCE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+      JWT_SECRET: ${JWT_SECRET}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
