@@ -91,10 +91,12 @@ public class CustomerService {
 
         ReservationStatusRequest status = null;
         try {
-            status = template.getForObject("http://localhost:8080/customer/" + id + "/active", ReservationStatusRequest.class);
+            status = template.getForObject("http://booking-service:8080/api/reservation/has-active-booking", ReservationStatusRequest.class);
         } catch (RestClientException e) {
-            System.out.println("RestClientException");
-            throw new BadRequestException("Could not connect to Reservation service");
+            System.err.println("status: " + status);
+            e.printStackTrace();
+            System.err.println("RestClientException");
+            throw new BadRequestException("Could not connect to booking service");
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

@@ -29,7 +29,7 @@ public class AuthController {
 
         Customer customer = service.getCustomerInformation(dto.email);
 
-        if(!bcrypt.matches(dto.password, customer.getPassword())) {
+        if(bcrypt.matches(dto.password, customer.getPassword())) {
             return jwt.generateToken(customer.getId());
         }
         throw new RuntimeException("Fel inloggning");

@@ -2,19 +2,15 @@ package org.example.customerservice.customer.controller;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-
-import org.example.customerservice.customer.model.Customer;
 import org.example.customerservice.customer.model.dto.CreateCustomerRequest;
-import org.example.customerservice.customer.model.dto.CustomerLoginRequest;
 import org.example.customerservice.customer.model.dto.CustomerUpdateRequest;
 import org.example.customerservice.customer.service.CustomerService;
-
 import org.example.customerservice.exceptionhandler.customexeptions.AlreadyExistException;
 import org.example.customerservice.exceptionhandler.customexeptions.HaveReservationException;
-import org.example.customerservice.exceptionhandler.customexeptions.WrongEmailOrPasswordException;
-
+import org.example.customerservice.security.jwt.service.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,9 +21,11 @@ import java.util.Map;
 @RequestMapping("api/customers")
 public class CustomerController {
     private final CustomerService customerService;
+    private final JwtService jwtService;
 
-    public CustomerController(CustomerService customerService) {
+    public CustomerController(CustomerService customerService, JwtService jwtService) {
         this.customerService = customerService;
+        this.jwtService = jwtService;
     }
 
     @GetMapping("/test")
@@ -151,13 +149,9 @@ public class CustomerController {
 
 
     @DeleteMapping
-    public ResponseEntity<?> deleteCustomer(HttpSession session) {
+    public ResponseEntity<?> deleteCustomer(@AuthenticationPrincipal Long userId) {
 
-        Long id = (Long) session.getAttribute(
-                "customerId"
-        );
-
-        if (id == null) {
+        if (userId == null) {
             return (ResponseEntity
                     .status(
                             HttpStatus.NETWORK_AUTHENTICATION_REQUIRED
@@ -171,7 +165,7 @@ public class CustomerController {
         }
 
         try {
-            customerService.deleteCustomer(id);
+            customerService.deleteCustomer(userId);
 
             return (ResponseEntity.ok().body(Map.of("message", "account deleted")));
 
