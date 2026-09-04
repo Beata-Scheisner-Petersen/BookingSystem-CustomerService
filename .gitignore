@@ -46,8 +46,6 @@ build/
 .lombok/
 
 # Environment / secrets
-*.env
-.env.local
 application-local.properties
 application-secret.properties
 
