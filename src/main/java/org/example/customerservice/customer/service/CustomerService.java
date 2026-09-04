@@ -1,12 +1,14 @@
 package org.example.customerservice.customer.service;
 
-import jakarta.servlet.http.HttpSession;
 import org.example.customerservice.customer.model.Customer;
 import org.example.customerservice.customer.model.dto.CreateCustomerRequest;
 import org.example.customerservice.customer.model.dto.CustomerUpdateRequest;
 import org.example.customerservice.customer.model.dto.ReservationStatusRequest;
 import org.example.customerservice.customer.repository.CustomerRepository;
-import org.example.customerservice.exceptionhandler.customexeptions.*;
+import org.example.customerservice.exceptionhandler.customexeptions.AlreadyExistException;
+import org.example.customerservice.exceptionhandler.customexeptions.BadRequestException;
+import org.example.customerservice.exceptionhandler.customexeptions.HaveReservationException;
+import org.example.customerservice.exceptionhandler.customexeptions.NotFoundException;
 import org.example.customerservice.security.password.PasswordService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,16 +42,6 @@ public class CustomerService {
 
         return customerRepository.save(customer);
     }
-
-//    public Customer loginCustomer(String email, String password) {
-//        Customer customer = customerRepository.findByEmail(email).orElseThrow(() -> new WrongEmailOrPasswordException("Wrong email or password"));
-//
-//        if (!passwordService.matches(password, customer.getPassword())) {
-//            throw new WrongEmailOrPasswordException("Wrong email or password");
-//        }
-//
-//        return customer;
-//    }
 
     @Transactional
     public void updateCustomerInfo(Long id, CustomerUpdateRequest request) {
@@ -110,15 +102,17 @@ public class CustomerService {
         customerRepository.delete(customer);
     }
 
-    public Long getId(HttpSession session) {
-        Long id = (Long) session.getAttribute("customerId");
-        if (id == null) {
-            throw new IllegalStateException("Customer id not found in session");
-        }
-        return id;
-    }
-
     public Customer getCustomerInformation(String email) {
         return customerRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("Customer not found"));
+    }
+
+    public boolean doesCustomerExist(Long id) {
+        boolean customerExist;
+        try {
+            customerExist = customerRepository.existsById(id);
+        } catch (Exception e) {
+            throw new RuntimeException("Unexpected error occurred");
+        }
+        return customerExist;
     }
 }

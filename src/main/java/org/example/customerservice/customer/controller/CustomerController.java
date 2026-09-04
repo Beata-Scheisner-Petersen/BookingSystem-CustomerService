@@ -2,17 +2,12 @@ package org.example.customerservice.customer.controller;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-
-import org.example.customerservice.customer.model.Customer;
 import org.example.customerservice.customer.model.dto.CreateCustomerRequest;
-import org.example.customerservice.customer.model.dto.CustomerLoginRequest;
 import org.example.customerservice.customer.model.dto.CustomerUpdateRequest;
+import org.example.customerservice.customer.model.dto.doesCustomerExistResponse;
 import org.example.customerservice.customer.service.CustomerService;
-
 import org.example.customerservice.exceptionhandler.customexeptions.AlreadyExistException;
 import org.example.customerservice.exceptionhandler.customexeptions.HaveReservationException;
-import org.example.customerservice.exceptionhandler.customexeptions.WrongEmailOrPasswordException;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -66,59 +61,10 @@ public class CustomerController {
         );
     }
 
-//    @PostMapping("/login")
-//    public ResponseEntity<?> login(
-//            @Valid @RequestBody CustomerLoginRequest request,
-//            BindingResult result,
-//            HttpSession session
-//    ) {
-//        if (result.hasErrors()) {
-//            Map<String, String> errors = new HashMap<>();
-//
-//            result.getFieldErrors()
-//                    .forEach(
-//                            error -> errors.put(
-//                                    error.getField(),
-//                                    error.getDefaultMessage()
-//                            )
-//                    )
-//            ;
-//
-//            return (ResponseEntity
-//                    .badRequest()
-//                    .body(errors)
-//            );
-//        }
-//
-//        try {
-//            Customer customer = customerService.loginCustomer(
-//                    request.email(),
-//                    request.password()
-//            );
-//
-//            session.setAttribute(
-//                    "customerId",
-//                    customer.getId()
-//            );
-//
-//            return (ResponseEntity.ok()
-//                    .body(
-//                            Map.of(
-//                                    "message",
-//                                    "login successful"
-//                            )
-//                    )
-//            );
-//
-//        } catch (WrongEmailOrPasswordException e) {
-//            return (ResponseEntity
-//                    .status(409)
-//                    .body(
-//                            e.getMessage()
-//                    )
-//            );
-//        }
-//    }
+    @GetMapping("/does-customer-exist/{id}")
+    public doesCustomerExistResponse doesCustomerExist(@PathVariable Long id) {
+        return new doesCustomerExistResponse(customerService.doesCustomerExist(id));
+    }
 
     @PostMapping("/update")
     public ResponseEntity<?> updateCustomer(
@@ -182,30 +128,4 @@ public class CustomerController {
         }
     }
 
-    @PostMapping("/getId")
-    public ResponseEntity<?> getId(HttpSession session) {
-        try {
-            Long id = customerService.getId(session);
-            return ResponseEntity
-                    .status(
-                            200
-                    ).body(
-                            Map.of(
-                                    "success",
-                                    id
-                            )
-                    );
-        } catch (IllegalStateException e) {
-            return (ResponseEntity
-                    .status(
-                            401
-                    ).body(
-                            Map.of(
-                                    "error",
-                                    e.getMessage()
-                            )
-                    )
-            );
-        }
-    }
 }
