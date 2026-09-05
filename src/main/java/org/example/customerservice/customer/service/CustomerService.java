@@ -2,6 +2,7 @@ package org.example.customerservice.customer.service;
 
 import org.example.customerservice.customer.model.Customer;
 import org.example.customerservice.customer.model.dto.CreateCustomerRequest;
+import org.example.customerservice.customer.model.dto.CreateCustomerResponse;
 import org.example.customerservice.customer.model.dto.CustomerUpdateRequest;
 import org.example.customerservice.customer.model.dto.ReservationStatusRequest;
 import org.example.customerservice.customer.repository.CustomerRepository;
@@ -26,7 +27,7 @@ public class CustomerService {
         this.passwordService = passwordService;
     }
 
-    public Customer createNewCustomer(CreateCustomerRequest request) {
+    public CreateCustomerResponse createNewCustomer(CreateCustomerRequest request) {
 
         if (customerRepository.existsByEmail(request.email())) {
             throw new AlreadyExistException("Email already exist");
@@ -38,9 +39,17 @@ public class CustomerService {
             throw new AlreadyExistException("Phone number already exist");
         }
 
-        Customer customer = new Customer(request.firstname(), request.lastname(), request.identificationNumber(), request.email(), passwordService.hash(request.password()), request.phoneNumber());
+        Customer customer = new Customer(
+                request.firstname(),
+                request.lastname(),
+                request.identificationNumber(),
+                request.email(),
+                passwordService.hash(request.password()),
+                request.phoneNumber()
+        );
+        customerRepository.save(customer);
 
-        return customerRepository.save(customer);
+        return new CreateCustomerResponse("account successfully created", true);
     }
 
     @Transactional
@@ -107,12 +116,9 @@ public class CustomerService {
     }
 
     public boolean doesCustomerExist(Long id) {
-        boolean customerExist;
-        try {
-            customerExist = customerRepository.existsById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Unexpected error occurred");
+        if (id == null) {
+            throw new RuntimeException("could not get valid id");
         }
-        return customerExist;
+        return customerRepository.existsById(id);
     }
 }
