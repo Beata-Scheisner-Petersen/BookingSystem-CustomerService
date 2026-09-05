@@ -106,13 +106,18 @@ public class CustomerService {
         return customerRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("Customer not found"));
     }
 
-    public boolean doesCustomerExist(Long id) {
+    public Boolean doesCustomerExist(Long id) {
+        System.err.println("does-customer-exist: 2");
         boolean customerExist;
         try {
+            System.err.println("does-customer-exist: 3");
             customerExist = customerRepository.existsById(id);
+            System.err.println("does-customer-exist: 4");
         } catch (Exception e) {
+            System.err.println("does-customer-exist: 5");
             throw new RuntimeException("Unexpected error occurred");
         }
+        System.err.println("does-customer-exist: 6");
         return customerExist;
     }
 }

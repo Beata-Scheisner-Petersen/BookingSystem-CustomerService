@@ -62,8 +62,14 @@ public class CustomerController {
     }
 
     @GetMapping("/does-customer-exist/{id}")
-    public doesCustomerExistResponse doesCustomerExist(@PathVariable Long id) {
-        return new doesCustomerExistResponse(customerService.doesCustomerExist(id));
+    public ResponseEntity<doesCustomerExistResponse> doesCustomerExist(@PathVariable Long id) {
+        try {
+            System.err.println("does-customer-exist: 1");
+            return ResponseEntity.ok().body(new doesCustomerExistResponse(customerService.doesCustomerExist(id)));
+        }catch (RuntimeException e) {
+            System.err.println("does-customer-exist: 7");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @PostMapping("/update")
