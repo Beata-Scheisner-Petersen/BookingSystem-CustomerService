@@ -3,11 +3,12 @@ package org.example.customerservice.customer.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.example.customerservice.customer.model.dto.CreateCustomerRequest;
+import org.example.customerservice.customer.model.dto.CreateCustomerResponse;
 import org.example.customerservice.customer.model.dto.CustomerUpdateRequest;
-import org.example.customerservice.customer.model.dto.doesCustomerExistResponse;
 import org.example.customerservice.customer.service.CustomerService;
 import org.example.customerservice.exceptionhandler.customexeptions.AlreadyExistException;
 import org.example.customerservice.exceptionhandler.customexeptions.HaveReservationException;
+import org.example.customerservice.security.jwt.service.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -17,20 +18,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("api/customers")
+@RequestMapping("/api/customers")
 public class CustomerController {
     private final CustomerService customerService;
+    private final JwtService jwtService;
 
-    public CustomerController(CustomerService customerService) {
+    public CustomerController(CustomerService customerService, JwtService jwtService) {
         this.customerService = customerService;
+        this.jwtService = jwtService;
     }
 
     @GetMapping("/test")
     public String test() {
-        return "test";
+        return "test customer-service";
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<?> createCustomer(
             @Valid @RequestBody CreateCustomerRequest customer,
             BindingResult result
@@ -46,11 +49,16 @@ public class CustomerController {
                                     error.getDefaultMessage()
                             )
                     );
-
             return (ResponseEntity
                     .badRequest()
                     .body(errors)
             );
+        }
+        CreateCustomerResponse response = customerService.createNewCustomer(customer);
+        if (!response.success()) {
+            return (ResponseEntity
+                    .status(HttpStatus.NOT_ACCEPTABLE))
+                    .body(response.message());
         }
         return (ResponseEntity
                 .status(
@@ -61,10 +69,10 @@ public class CustomerController {
         );
     }
 
-    @GetMapping("/does-customer-exist/{id}")
-    public doesCustomerExistResponse doesCustomerExist(@PathVariable Long id) {
-        return new doesCustomerExistResponse(customerService.doesCustomerExist(id));
-    }
+//    @GetMapping("/does-customer-exist")
+//    public doesCustomerExistResponse doesCustomerExist() {
+//        //
+//    }
 
     @PostMapping("/update")
     public ResponseEntity<?> updateCustomer(
@@ -127,5 +135,4 @@ public class CustomerController {
             return (ResponseEntity.status(500).body(Map.of("error", e.getMessage())));
         }
     }
-
 }
