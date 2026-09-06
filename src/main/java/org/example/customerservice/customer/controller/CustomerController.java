@@ -9,6 +9,7 @@ import org.example.customerservice.exceptionhandler.customexeptions.AlreadyExist
 import org.example.customerservice.exceptionhandler.customexeptions.HaveReservationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,10 +63,10 @@ public class CustomerController {
         );
     }
 
-//    @GetMapping("/does-customer-exist")
-//    public doesCustomerExistResponse doesCustomerExist() {
-//        //
-//    }
+    @GetMapping("/does-customer-exist")
+    public boolean doesCustomerExist(@AuthenticationPrincipal Long userId) {
+        return customerService.doesCustomerExist(userId);
+    }
 
     @PostMapping("/update")
     public ResponseEntity<?> updateCustomer(
