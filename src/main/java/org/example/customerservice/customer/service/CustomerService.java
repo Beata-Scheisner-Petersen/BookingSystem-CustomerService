@@ -1,10 +1,7 @@
 package org.example.customerservice.customer.service;
 
 import org.example.customerservice.customer.model.Customer;
-import org.example.customerservice.customer.model.dto.CreateCustomerRequest;
-import org.example.customerservice.customer.model.dto.CreateCustomerResponse;
-import org.example.customerservice.customer.model.dto.CustomerUpdateRequest;
-import org.example.customerservice.customer.model.dto.ReservationStatusRequest;
+import org.example.customerservice.customer.model.dto.*;
 import org.example.customerservice.customer.repository.CustomerRepository;
 import org.example.customerservice.exceptionhandler.customexeptions.AlreadyExistException;
 import org.example.customerservice.exceptionhandler.customexeptions.BadRequestException;
@@ -120,5 +117,15 @@ public class CustomerService {
             throw new RuntimeException("could not get valid id");
         }
         return customerRepository.existsById(id);
+    }
+
+    public CustomerInfoResponse getInfo(Long customerId) {
+        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new NotFoundException("Customer not found"));
+        return new CustomerInfoResponse(
+                customer.getFirstname(),
+                customer.getLastname(),
+                customer.getEmail(),
+                customer.getPhoneNumber()
+        );
     }
 }

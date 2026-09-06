@@ -102,8 +102,20 @@ public class Customer {
         this.firstname = firstname;
     }
 
+    public String getLastname() {
+        return lastname;
+    }
+
     public void setLastname(String lastname) {
         this.lastname = lastname;
+    }
+
+    public String getIdentificationNumber() {
+        return identificationNumber;
+    }
+
+    public void setIdentificationNumber(String identificationNumber) {
+        this.identificationNumber = identificationNumber;
     }
 
     public String getEmail() {
@@ -120,6 +132,10 @@ public class Customer {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
     public void setPhoneNumber(String phoneNumber) {
