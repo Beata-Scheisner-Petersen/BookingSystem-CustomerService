@@ -3,12 +3,10 @@ package org.example.customerservice.customer.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.example.customerservice.customer.model.dto.CreateCustomerRequest;
-import org.example.customerservice.customer.model.dto.CreateCustomerResponse;
 import org.example.customerservice.customer.model.dto.CustomerUpdateRequest;
 import org.example.customerservice.customer.service.CustomerService;
 import org.example.customerservice.exceptionhandler.customexeptions.AlreadyExistException;
 import org.example.customerservice.exceptionhandler.customexeptions.HaveReservationException;
-import org.example.customerservice.security.jwt.service.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -21,11 +19,10 @@ import java.util.Map;
 @RequestMapping("/api/customers")
 public class CustomerController {
     private final CustomerService customerService;
-    private final JwtService jwtService;
 
-    public CustomerController(CustomerService customerService, JwtService jwtService) {
+    public CustomerController(CustomerService customerService) {
         this.customerService = customerService;
-        this.jwtService = jwtService;
+
     }
 
     @GetMapping("/test")
@@ -54,12 +51,8 @@ public class CustomerController {
                     .body(errors)
             );
         }
-        CreateCustomerResponse response = customerService.createNewCustomer(customer);
-        if (!response.success()) {
-            return (ResponseEntity
-                    .status(HttpStatus.NOT_ACCEPTABLE))
-                    .body(response.message());
-        }
+
+
         return (ResponseEntity
                 .status(
                         HttpStatus.CREATED
