@@ -39,13 +39,10 @@ public class JwtService {
     public Boolean isTokenValid(String token) {
         try {
             extractUserId(token);
-            System.err.println("JWT Token valid: ");
             return true;
         } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            System.err.println("JWT Token has expired: " + e.getMessage());
             return false;
         } catch (io.jsonwebtoken.JwtException e) {
-            System.err.println("Invalid JWT Token: " + e.getMessage());
             return false;
         }
     }
@@ -54,6 +51,4 @@ public class JwtService {
         byte[] bytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(bytes);
     }
-
-
 }

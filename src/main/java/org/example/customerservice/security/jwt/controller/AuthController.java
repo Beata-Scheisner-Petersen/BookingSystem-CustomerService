@@ -1,6 +1,7 @@
 package org.example.customerservice.security.jwt.controller;
 
 import org.example.customerservice.customer.model.Customer;
+import org.example.customerservice.customer.model.dto.CustomerLoginRequest;
 import org.example.customerservice.customer.service.CustomerService;
 import org.example.customerservice.security.jwt.service.JwtService;
 import org.example.customerservice.security.password.PasswordService;
@@ -22,16 +23,15 @@ public class AuthController {
         this.bcrypt = bcrypt;
     }
 
-    record LoginDto(String email, String password){}
-
     @PostMapping("/login")
-    public String login(@RequestBody LoginDto dto){
+    public String login(@RequestBody CustomerLoginRequest request){
 
-        Customer customer = service.getCustomerInformation(dto.email);
+        Customer customer = service.getCustomerInformation(request.email());
 
-        if(!bcrypt.matches(dto.password, customer.getPassword())) {
+        if(bcrypt.matches(request.password(), customer.getPassword())) {
             return jwt.generateToken(customer.getId());
         }
+
         throw new RuntimeException("Fel inloggning");
     }
 }

@@ -3,6 +3,7 @@ package org.example.customerservice.customer.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.example.customerservice.customer.model.dto.CreateCustomerRequest;
+import org.example.customerservice.customer.model.dto.CustomerInfoResponse;
 import org.example.customerservice.customer.model.dto.CustomerUpdateRequest;
 import org.example.customerservice.customer.service.CustomerService;
 import org.example.customerservice.exceptionhandler.customexeptions.AlreadyExistException;
@@ -128,5 +129,10 @@ public class CustomerController {
         } catch (IllegalArgumentException e) {
             return (ResponseEntity.status(500).body(Map.of("error", e.getMessage())));
         }
+    }
+
+    @GetMapping("/info")
+    public CustomerInfoResponse getCustomerInfo (@AuthenticationPrincipal Long id) {
+        return customerService.getInfo(id);
     }
 }
