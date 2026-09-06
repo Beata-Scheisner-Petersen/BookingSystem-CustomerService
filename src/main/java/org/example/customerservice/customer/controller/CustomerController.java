@@ -71,17 +71,17 @@ public class CustomerController {
 
     @PostMapping("/update")
     public ResponseEntity<?> updateCustomer(
-            HttpSession session,
-            CustomerUpdateRequest request
+            @AuthenticationPrincipal Long id,
+            @RequestBody CustomerUpdateRequest request
     ) {
-        Long id = (Long) session.getAttribute("customerId");
-
         if (id == null) {
+            System.err.println("null");
             return ResponseEntity.status(401).body(Map.of("error", "Not logged in"));
         }
 
         try {
             customerService.updateCustomerInfo(id, request);
+            System.err.println("\n update returnerar \n");
             return ResponseEntity.ok(Map.of("success", true));
 
         } catch (AlreadyExistException error) {
@@ -97,7 +97,6 @@ public class CustomerController {
             return ResponseEntity.badRequest().body(Map.of("error", "Unknown error"));
         }
     }
-
 
     @DeleteMapping
     public ResponseEntity<?> deleteCustomer(HttpSession session) {

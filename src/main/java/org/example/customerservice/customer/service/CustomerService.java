@@ -52,6 +52,7 @@ public class CustomerService {
     @Transactional
     public void updateCustomerInfo(Long id, CustomerUpdateRequest request) {
         Customer customer = customerRepository.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
+        System.err.println("\n customerID: " + customer.getId() + "\n");
 
         if (request.firstname() != null && !request.firstname().isBlank()) {
             customer.setFirstname(request.firstname());
@@ -80,7 +81,7 @@ public class CustomerService {
         if (request.password() != null && !request.password().isBlank()) {
             customer.setPassword(passwordService.hash(request.password()));
         }
-
+        System.err.println("\n når save \n");
         customerRepository.save(customer);
     }
 
