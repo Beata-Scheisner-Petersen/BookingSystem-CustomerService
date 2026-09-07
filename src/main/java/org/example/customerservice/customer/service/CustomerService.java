@@ -8,6 +8,9 @@ import org.example.customerservice.exceptionhandler.customexeptions.BadRequestEx
 import org.example.customerservice.exceptionhandler.customexeptions.HaveReservationException;
 import org.example.customerservice.exceptionhandler.customexeptions.NotFoundException;
 import org.example.customerservice.security.password.PasswordService;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
@@ -52,7 +55,6 @@ public class CustomerService {
     @Transactional
     public void updateCustomerInfo(Long id, CustomerUpdateRequest request) {
         Customer customer = customerRepository.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
-        System.err.println("\n customerID: " + customer.getId() + "\n");
 
         if (request.firstname() != null && !request.firstname().isBlank()) {
             customer.setFirstname(request.firstname());
@@ -81,31 +83,39 @@ public class CustomerService {
         if (request.password() != null && !request.password().isBlank()) {
             customer.setPassword(passwordService.hash(request.password()));
         }
-        System.err.println("\n når save \n");
         customerRepository.save(customer);
     }
 
-    public void deleteCustomer(Long id) {
+    public void deleteCustomer(Long id, String token) {
         Customer customer = customerRepository.findById(id).orElseThrow(() -> new NotFoundException("id not found"));
 
-        ReservationStatusRequest status = null;
+        Boolean hasActiveReservations = null;
         try {
-            status = template.getForObject("http://localhost:8080/customer/" + id + "/active", ReservationStatusRequest.class);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", formatBearerToken(token));
+            
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            
+            hasActiveReservations = template.exchange(
+                    "http://booking-service:8082/api/reservation/has-active-booking",
+                    HttpMethod.GET,
+                    entity,
+                    Boolean.class
+            ).getBody();
+            
         } catch (RestClientException e) {
-            System.out.println("RestClientException");
             throw new BadRequestException("Could not connect to Reservation service");
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new BadRequestException("Error checking reservation status: " + e.getMessage());
         }
 
-        if (status == null) {
+        if (hasActiveReservations == null) {
             throw new BadRequestException("Could not get status from reservation service");
         }
 
-        if (status.hasActiveReservations()) {
+        if (hasActiveReservations) {
             throw new HaveReservationException("You can't delete your account while having active bookings");
         }
-
         customerRepository.delete(customer);
     }
 
@@ -128,5 +138,12 @@ public class CustomerService {
                 customer.getEmail(),
                 customer.getPhoneNumber()
         );
+    }
+
+    private String formatBearerToken(String token) {
+        if (token != null && token.startsWith("Bearer ")) {
+            return token;
+        }
+        return "Bearer " + token;
     }
 }
