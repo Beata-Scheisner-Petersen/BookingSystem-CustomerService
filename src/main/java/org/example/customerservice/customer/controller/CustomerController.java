@@ -1,21 +1,15 @@
 package org.example.customerservice.customer.controller;
 
-import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
-import org.example.customerservice.customer.model.dto.CreateCustomerRequest;
-import org.example.customerservice.customer.model.dto.CustomerInfoResponse;
-import org.example.customerservice.customer.model.dto.CustomerUpdateRequest;
-import org.example.customerservice.customer.service.CustomerService;
-import org.example.customerservice.exceptionhandler.customexeptions.AlreadyExistException;
-import org.example.customerservice.exceptionhandler.customexeptions.HaveReservationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
+import jakarta.validation.*;
+import org.example.customerservice.customer.model.dto.*;
+import org.example.customerservice.customer.service.*;
+import org.example.customerservice.exceptionhandler.customexeptions.*;
+import org.springframework.http.*;
+import org.springframework.security.core.annotation.*;
+import org.springframework.validation.*;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -33,35 +27,17 @@ public class CustomerController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createCustomer(
-            @Valid @RequestBody CreateCustomerRequest customer,
-            BindingResult result
-    ) {
+    public ResponseEntity<?> createCustomer(@Valid @RequestBody CreateCustomerRequest customer, BindingResult result) {
 
         if (result.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
 
-            result.getFieldErrors()
-                    .forEach(
-                            error -> errors.put(
-                                    error.getField(),
-                                    error.getDefaultMessage()
-                            )
-                    );
-            return (ResponseEntity
-                    .badRequest()
-                    .body(errors)
-            );
+            result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+            return (ResponseEntity.badRequest().body(errors));
         }
 
 
-        return (ResponseEntity
-                .status(
-                        HttpStatus.CREATED
-                ).body(
-                        customerService.createNewCustomer(customer)
-                )
-        );
+        return (ResponseEntity.status(HttpStatus.CREATED).body(customerService.createNewCustomer(customer)));
     }
 
     @GetMapping("/does-customer-exist")
@@ -70,18 +46,15 @@ public class CustomerController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<?> updateCustomer(
-            @AuthenticationPrincipal Long id,
-            @RequestBody CustomerUpdateRequest request
-    ) {
+    public ResponseEntity<?> updateCustomer(@AuthenticationPrincipal Long id, @RequestBody CustomerUpdateRequest request) {
         if (id == null) {
-            System.err.println("null");
+            System.err.println("\n id null \n");
             return ResponseEntity.status(401).body(Map.of("error", "Not logged in"));
         }
 
         try {
             customerService.updateCustomerInfo(id, request);
-            System.err.println("\n update returnerar \n");
+
             return ResponseEntity.ok(Map.of("success", true));
 
         } catch (AlreadyExistException error) {
@@ -98,28 +71,14 @@ public class CustomerController {
         }
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> deleteCustomer(HttpSession session) {
-
-        Long id = (Long) session.getAttribute(
-                "customerId"
-        );
-
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteCustomer(@AuthenticationPrincipal Long id, @RequestHeader("Authorization") String token) {
         if (id == null) {
-            return (ResponseEntity
-                    .status(
-                            HttpStatus.NETWORK_AUTHENTICATION_REQUIRED
-                    ).body(
-                            Map.of(
-                                    "error",
-                                    "authorization failed"
-                            )
-                    )
-            );
+            return (ResponseEntity.status(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED).body(Map.of("error", "authorization failed")));
         }
 
         try {
-            customerService.deleteCustomer(id);
+            customerService.deleteCustomer(id, token);
 
             return (ResponseEntity.ok().body(Map.of("message", "account deleted")));
 
@@ -127,11 +86,13 @@ public class CustomerController {
             return (ResponseEntity.status(409).body(Map.of("error", e.getMessage())));
         } catch (IllegalArgumentException e) {
             return (ResponseEntity.status(500).body(Map.of("error", e.getMessage())));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
         }
     }
 
     @GetMapping("/info")
-    public CustomerInfoResponse getCustomerInfo (@AuthenticationPrincipal Long id) {
+    public CustomerInfoResponse getCustomerInfo(@AuthenticationPrincipal Long id) {
         return customerService.getInfo(id);
     }
 }
