@@ -49,7 +49,7 @@ kind: Service
 metadata:
   name: review-service
 spec:
-  #type: LoadBalancer #Makes the program reachable from outside kubernetes (Port Forwarded ISH)
+  type: LoadBalancer #Makes the program reachable from outside kubernetes (Port Forwarded ISH)
   selector:
     app: review-service
   ports:

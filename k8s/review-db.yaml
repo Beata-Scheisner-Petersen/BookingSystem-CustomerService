@@ -20,7 +20,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: kubernetes-secrets
-                  key: review-db-name
+                  key: REVIEW_DB_NAME
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
