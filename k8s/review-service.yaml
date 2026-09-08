@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata: #Resource Name
-  name: customer-service
+  name: review-service
 spec:
   replicas: 1 #How many Copies that exists
   selector:
     matchLabels:
-      app: customer-service
+      app: review-service
   template: #How the POD should look/be setup
     metadata:
       labels:
-        app: customer-service
+        app: review-service
     spec:
       containers:
-        - name: customer-service #Container name
-          image: beatasp/booking-system-customer #what Program image to use
+        - name: review-service #Container name
+          image: sleepingfores7s/booking-review:latest #what Program image to use
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8081
+            - containerPort: 8083
           env:
             - name: JWT_SECRET
               valueFrom:
@@ -28,17 +28,17 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: kubernetes-secrets
-                  key: CUSTOMER_DB_URL
+                  key: REVIEW_DB_URL
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: kubernetes-secrets
-                  key: CUSTOMER_DB_USERNAME
+                  key: REVIEW_DB_USERNAME
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: kubernetes-secrets
-                  key: CUSTOMER_DB_PASSWORD
+                  key: REVIEW_DB_PASSWORD
 
 
 ---
@@ -47,10 +47,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: customer-service
+  name: review-service
 spec:
+  #type: LoadBalancer #Makes the program reachable from outside kubernetes (Port Forwarded ISH)
   selector:
-    app: customer-service
+    app: review-service
   ports:
-    - port: 8081
-      targetPort: 8081
+    - port: 8083
+      targetPort: 8083
