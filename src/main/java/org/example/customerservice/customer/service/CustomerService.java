@@ -4,16 +4,10 @@ import org.example.customerservice.customer.model.Customer;
 import org.example.customerservice.customer.model.dto.*;
 import org.example.customerservice.customer.repository.CustomerRepository;
 import org.example.customerservice.exceptionhandler.customexeptions.AlreadyExistException;
-import org.example.customerservice.exceptionhandler.customexeptions.BadRequestException;
-import org.example.customerservice.exceptionhandler.customexeptions.HaveReservationException;
 import org.example.customerservice.exceptionhandler.customexeptions.NotFoundException;
 import org.example.customerservice.security.password.PasswordService;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -27,7 +21,7 @@ public class CustomerService {
         this.passwordService = passwordService;
     }
 
-    public CreateCustomerResponse createNewCustomer(CreateCustomerRequest request) {
+    public void createNewCustomer(CreateCustomerRequest request) {
 
         if (customerRepository.existsByEmail(request.email())) {
             throw new AlreadyExistException("Email already exist");
@@ -48,8 +42,6 @@ public class CustomerService {
                 request.phoneNumber()
         );
         customerRepository.save(customer);
-
-        return new CreateCustomerResponse("account successfully created", true);
     }
 
     @Transactional
@@ -86,36 +78,8 @@ public class CustomerService {
         customerRepository.save(customer);
     }
 
-    public void deleteCustomer(Long id, String token) {
+    public void deleteCustomer(Long id) {
         Customer customer = customerRepository.findById(id).orElseThrow(() -> new NotFoundException("id not found"));
-
-        Boolean hasActiveReservations = null;
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", formatBearerToken(token));
-            
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-            
-            hasActiveReservations = template.exchange(
-                    "http://booking-service:8082/api/reservation/has-active-booking",
-                    HttpMethod.GET,
-                    entity,
-                    Boolean.class
-            ).getBody();
-            
-        } catch (RestClientException e) {
-            throw new BadRequestException("Could not connect to Reservation service");
-        } catch (Exception e) {
-            throw new BadRequestException("Error checking reservation status: " + e.getMessage());
-        }
-
-        if (hasActiveReservations == null) {
-            throw new BadRequestException("Could not get status from reservation service");
-        }
-
-        if (hasActiveReservations) {
-            throw new HaveReservationException("You can't delete your account while having active bookings");
-        }
         customerRepository.delete(customer);
     }
 
