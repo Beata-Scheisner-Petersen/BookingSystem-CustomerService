@@ -36,8 +36,8 @@ public class CustomerController {
             return (ResponseEntity.badRequest().body(errors));
         }
 
-
-        return (ResponseEntity.status(HttpStatus.CREATED).body(customerService.createNewCustomer(customer)));
+        customerService.createNewCustomer(customer);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/does-customer-exist")
@@ -72,14 +72,13 @@ public class CustomerController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteCustomer(@AuthenticationPrincipal Long id, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> deleteCustomer(@AuthenticationPrincipal Long id) {
         if (id == null) {
             return (ResponseEntity.status(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED).body(Map.of("error", "authorization failed")));
         }
 
         try {
-            customerService.deleteCustomer(id, token);
-
+            customerService.deleteCustomer(id);
             return (ResponseEntity.ok().body(Map.of("message", "account deleted")));
 
         } catch (HaveReservationException e) {
