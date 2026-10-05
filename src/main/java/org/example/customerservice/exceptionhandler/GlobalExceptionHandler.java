@@ -1,8 +1,6 @@
 package org.example.customerservice.exceptionhandler;
 
-import org.example.customerservice.exceptionhandler.customexeptions.AlreadyExistException;
-import org.example.customerservice.exceptionhandler.customexeptions.HaveReservationException;
-import org.example.customerservice.exceptionhandler.customexeptions.WrongEmailOrPasswordException;
+import org.example.customerservice.exceptionhandler.customexeptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -83,6 +81,20 @@ public class GlobalExceptionHandler {
                 ).body(
                         e.getMessage()
                 );
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<String> handleInvalidCredentials(InvalidCredentialsException e) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(e.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<String> handleNotFound(NotFoundException e) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(e.getMessage());
     }
 
 }
