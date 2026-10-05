@@ -46,7 +46,11 @@ public class CustomerService {
 
     @Transactional
     public void updateCustomerInfo(Long id, CustomerUpdateRequest request) {
-        Customer customer = customerRepository.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
+        Customer customer = customerRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new RuntimeException("Customer not found")
+                );
 
         if (request.firstname() != null && !request.firstname().isBlank()) {
             customer.setFirstname(request.firstname());
@@ -73,18 +77,29 @@ public class CustomerService {
         }
 
         if (request.password() != null && !request.password().isBlank()) {
-            customer.setPassword(passwordService.hash(request.password()));
+            customer.setPassword(passwordService
+                    .hash(request.password())
+            );
         }
         customerRepository.save(customer);
     }
 
     public void deleteCustomer(Long id) {
-        Customer customer = customerRepository.findById(id).orElseThrow(() -> new NotFoundException("id not found"));
+        Customer customer = customerRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new NotFoundException("id not found")
+                );
         customerRepository.delete(customer);
     }
 
     public Customer getCustomerInformation(String email) {
-        return customerRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("Customer not found"));
+        return (customerRepository
+                .findByEmail(email)
+                .orElseThrow(
+                        () -> new NotFoundException("Customer not found")
+                )
+        );
     }
 
     public boolean doesCustomerExist(Long id) {

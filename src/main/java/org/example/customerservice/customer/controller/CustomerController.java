@@ -27,17 +27,28 @@ public class CustomerController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createCustomer(@Valid @RequestBody CreateCustomerRequest customer, BindingResult result) {
-
+    public ResponseEntity<?> createCustomer(@Valid @RequestBody CreateCustomerRequest customer,
+                                            BindingResult result
+    ) {
         if (result.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
 
-            result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-            return (ResponseEntity.badRequest().body(errors));
+            result.getFieldErrors().forEach(
+                    error -> errors.put(
+                            error.getField(),
+                            error.getDefaultMessage()
+                    )
+            );
+            return (ResponseEntity
+                    .badRequest()
+                    .body(errors)
+            );
         }
-
         customerService.createNewCustomer(customer);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return (ResponseEntity
+                .status(HttpStatus.CREATED)
+                .build()
+        );
     }
 
     @GetMapping("/does-customer-exist")
@@ -49,44 +60,90 @@ public class CustomerController {
     public ResponseEntity<?> updateCustomer(@AuthenticationPrincipal Long id, @RequestBody CustomerUpdateRequest request) {
         if (id == null) {
             System.err.println("\n id null \n");
-            return ResponseEntity.status(401).body(Map.of("error", "Not logged in"));
+            return (ResponseEntity
+                    .status(401)
+                    .body(Map.of(
+                            "error", "Not logged in")
+                    )
+            );
         }
 
         try {
             customerService.updateCustomerInfo(id, request);
 
-            return ResponseEntity.ok(Map.of("success", true));
-
+            return (ResponseEntity
+                    .ok(Map.of(
+                            "success", true)
+                    )
+            );
         } catch (AlreadyExistException error) {
 
             if (error.getMessage().contains("Email")) {
-                return ResponseEntity.badRequest().body(Map.of("emailError", error.getMessage()));
+                return (ResponseEntity
+                        .badRequest()
+                        .body(Map.of(
+                                "emailError", error.getMessage())
+                        )
+                );
             }
 
             if (error.getMessage().contains("Phone")) {
-                return ResponseEntity.badRequest().body(Map.of("phoneError", error.getMessage()));
+                return (ResponseEntity
+                        .badRequest()
+                        .body(Map.of(
+                                "phoneError", error.getMessage())
+                        )
+                );
             }
 
-            return ResponseEntity.badRequest().body(Map.of("error", "Unknown error"));
+            return (ResponseEntity
+                    .badRequest().body(Map.of(
+                            "error", "Unknown error")
+                    )
+            );
         }
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteCustomer(@AuthenticationPrincipal Long id) {
         if (id == null) {
-            return (ResponseEntity.status(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED).body(Map.of("error", "authorization failed")));
+            return (ResponseEntity
+                    .status(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED)
+                    .body(Map.of(
+                            "error", "authorization failed")
+                    )
+            );
         }
 
         try {
             customerService.deleteCustomer(id);
-            return (ResponseEntity.ok().body(Map.of("message", "account deleted")));
+            return (ResponseEntity
+                    .ok().body(Map.of(
+                            "message", "account deleted")
+                    )
+            );
 
         } catch (HaveReservationException e) {
-            return (ResponseEntity.status(409).body(Map.of("error", e.getMessage())));
+            return (ResponseEntity
+                    .status(409)
+                    .body(Map.of(
+                            "error", e.getMessage())
+                    )
+            );
         } catch (IllegalArgumentException e) {
-            return (ResponseEntity.status(500).body(Map.of("error", e.getMessage())));
+            return (ResponseEntity
+                    .status(500)
+                    .body(Map.of(
+                            "error", e.getMessage())
+                    )
+            );
         } catch (RuntimeException e) {
-            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+            return (ResponseEntity
+                    .status(401)
+                    .body(Map.of(
+                            "error", e.getMessage())
+                    )
+            );
         }
     }
 
