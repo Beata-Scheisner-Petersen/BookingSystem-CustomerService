@@ -33,6 +33,7 @@ public class AuthController {
         Customer customer = service.getCustomerInformation(request.email());
 
         if(bcrypt.matches(request.password(), customer.getPassword())) {
+            logger.info("Customer with id {} login successful", customer.getId());
             return jwt.generateToken(customer.getId());
         }
         logger.error("Invalid email or password logg");
