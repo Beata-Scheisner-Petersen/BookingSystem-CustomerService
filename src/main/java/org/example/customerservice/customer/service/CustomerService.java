@@ -100,6 +100,7 @@ public class CustomerService {
                 .orElseThrow(
                         () -> new NotFoundException("id not found")
                 );
+        logger.info("account with id {} is deleted", id);
         customerRepository.delete(customer);
     }
 
