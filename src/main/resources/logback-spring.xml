@@ -16,7 +16,7 @@
         </encoder>
     </appender>
 
-    <root level="WARNING">
+    <root level="DEBUG">
         <appender-ref ref="DAILY_FILE" />
     </root>
 
