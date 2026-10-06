@@ -1,20 +1,23 @@
 package org.example.customerservice.customer.service;
 
 import org.example.customerservice.customer.model.Customer;
-import org.example.customerservice.customer.model.dto.*;
+import org.example.customerservice.customer.model.dto.CreateCustomerRequest;
+import org.example.customerservice.customer.model.dto.CustomerInfoResponse;
+import org.example.customerservice.customer.model.dto.CustomerUpdateRequest;
 import org.example.customerservice.customer.repository.CustomerRepository;
 import org.example.customerservice.exceptionhandler.customexeptions.AlreadyExistException;
 import org.example.customerservice.exceptionhandler.customexeptions.NotFoundException;
 import org.example.customerservice.security.password.PasswordService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 public class CustomerService {
     private final CustomerRepository customerRepository;
     private final PasswordService passwordService;
-    private final RestTemplate template = new RestTemplate();
+    final Logger logger = LoggerFactory.getLogger(CustomerService.class);
 
     public CustomerService(CustomerRepository customerRepository, PasswordService passwordService) {
         this.customerRepository = customerRepository;
@@ -24,12 +27,15 @@ public class CustomerService {
     public void createNewCustomer(CreateCustomerRequest request) {
 
         if (customerRepository.existsByEmail(request.email())) {
+            logger.warn("At create customer: Email already exist.");
             throw new AlreadyExistException("Email already exist");
 
         } else if (customerRepository.existsByIdentificationNumber(request.identificationNumber())) {
+            logger.warn("At create customer: Identification number already exist in the system");
             throw new AlreadyExistException("Identification number already exist in the system");
 
         } else if (request.phoneNumber() != null && customerRepository.existsByPhoneNumber(request.phoneNumber())) {
+            logger.warn("At create customer: Phone number already exist");
             throw new AlreadyExistException("Phone number already exist");
         }
 
@@ -41,6 +47,7 @@ public class CustomerService {
                 passwordService.hash(request.password()),
                 request.phoneNumber()
         );
+        logger.info("customer created with id: {}", customer.getId());
         customerRepository.save(customer);
     }
 
@@ -49,7 +56,10 @@ public class CustomerService {
         Customer customer = customerRepository
                 .findById(id)
                 .orElseThrow(
-                        () -> new RuntimeException("Customer not found")
+                        () -> {
+                            logger.error("At update customer: Customer with id {} not found", id);
+                            return new RuntimeException("Customer not found");
+                        }
                 );
 
         if (request.firstname() != null && !request.firstname().isBlank()) {
