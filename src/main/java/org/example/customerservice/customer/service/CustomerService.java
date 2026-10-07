@@ -47,8 +47,9 @@ public class CustomerService {
                 passwordService.hash(request.password()),
                 request.phoneNumber()
         );
-        logger.info("customer created with id: {}", customer.getId());
-        customerRepository.save(customer);
+
+        Customer savedCustomer = customerRepository.save(customer);
+        logger.info("customer created with id: {}", savedCustomer.getId());
     }
 
     @Transactional
