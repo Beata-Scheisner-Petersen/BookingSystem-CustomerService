@@ -53,7 +53,7 @@ public class CustomerService {
                 passwordService.hash(request.password()),
                 request.phoneNumber()
         );
-        logger.info("customer created with id: {}", customer.getId());
+        logger.info("customer created");
         customerRepository.save(customer);
     }
 
