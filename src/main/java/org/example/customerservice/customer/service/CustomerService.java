@@ -27,15 +27,21 @@ public class CustomerService {
     public void createNewCustomer(CreateCustomerRequest request) {
 
         if (customerRepository.existsByEmail(request.email())) {
-            logger.warn("At create customer: Email already exist.");
+            logger.warn(
+                    "At create customer: Email already exist."
+            );
             throw new AlreadyExistException("Email already exist");
 
         } else if (customerRepository.existsByIdentificationNumber(request.identificationNumber())) {
-            logger.warn("At create customer: Identification number already exist in the system");
+            logger.warn(
+                    "At create customer: Identification number already exist in the system"
+            );
             throw new AlreadyExistException("Identification number already exist in the system");
 
         } else if (request.phoneNumber() != null && customerRepository.existsByPhoneNumber(request.phoneNumber())) {
-            logger.warn("At create customer: Phone number already exist");
+            logger.warn(
+                    "At create customer: Phone number already exist"
+            );
             throw new AlreadyExistException("Phone number already exist");
         }
 
@@ -91,6 +97,7 @@ public class CustomerService {
                     .hash(request.password())
             );
         }
+        logger.info("Customer info with id {} is updated", id);
         customerRepository.save(customer);
     }
 
@@ -98,7 +105,10 @@ public class CustomerService {
         Customer customer = customerRepository
                 .findById(id)
                 .orElseThrow(
-                        () -> new NotFoundException("id not found")
+                        () -> {
+                            logger.error("at delete customer id {} not found", id);
+                            return new NotFoundException("id not found");
+                        }
                 );
         logger.info("account with id {} is deleted", id);
         customerRepository.delete(customer);
@@ -108,7 +118,10 @@ public class CustomerService {
         return (customerRepository
                 .findByEmail(email)
                 .orElseThrow(
-                        () -> new NotFoundException("Customer not found")
+                        () -> {
+                            logger.error("at getCustomerInfo, customer is not found");
+                            return new NotFoundException("Customer not found");
+                        }
                 )
         );
     }
@@ -117,11 +130,19 @@ public class CustomerService {
         if (id == null) {
             throw new RuntimeException("could not get valid id");
         }
+        logger.info("Customer with id {} is found", id);
         return customerRepository.existsById(id);
     }
 
     public CustomerInfoResponse getInfo(Long customerId) {
-        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new NotFoundException("Customer not found"));
+        Customer customer = customerRepository
+                .findById(customerId)
+                .orElseThrow(
+                        () -> {
+                            logger.error("Customer with id {} is not found", customerId);
+                            return new NotFoundException("Customer not found");
+                        }
+                );
         return new CustomerInfoResponse(
                 customer.getFirstname(),
                 customer.getLastname(),
